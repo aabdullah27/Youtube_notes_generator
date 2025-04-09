@@ -97,7 +97,8 @@ default_prompts = {
     
     "Mind Map": """You are professional notes maker. Create a MIND MAP style set of notes from the provided transcript. 
                 Use markdown to create a hierarchical structure showing relationships between concepts.
-                Use ## for main concepts and nested lists for related ideas."""
+                If possible provide a mermaide diagram in markdown format for proper understanding.
+                Explain by making connections between ideas and concepts.""",
 }
 
 def extract_video_id(video_url):
@@ -173,10 +174,9 @@ def groq_text_generation(transcript_text, prompt, conversation_history=None):
         messages.append({"role": "user", "content": f"Process this transcript: {transcript_text}"})
         
         response = client.chat.completions.create(
-            model="llama3-70b-8192",
+            model="llama3.3-70b-versatile",
             messages=messages,
-            temperature=0.7,
-            max_tokens=4000
+            temperature=0.5
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -223,8 +223,7 @@ def get_prompt_for_style(selected_style):
         return default_prompts["Detailed"]  # Fallback to detailed
 
 # Main input area
-youtube_link = st.text_input("🔗 Enter YouTube Video Link:", 
-                            placeholder="https://www.youtube.com/watch?v=...")
+youtube_link = st.text_input("🔗 Enter YouTube Video Link:", placeholder="https://www.youtube.com/watch?v=...")
 
 # Process video when link is provided
 if youtube_link and youtube_link != st.session_state.get('last_processed_link', ''):
@@ -346,8 +345,8 @@ with qa_tab:
                 
                 # Prepare Q&A prompt
                 qa_prompt = """You are an assistant that answers questions about a YouTube video based on its transcript. 
-                            Use only the information in the transcript to answer questions. 
-                            If the answer cannot be found in the transcript, clearly state that you don't know."""
+                            Use the information in the transcript to answer questions. Guide the student in the context of the video.
+                            If the question is not related to the video, respond with "I can only answer questions about the video."""
                 
                 # Generate answer based on selected API
                 with st.spinner("🧠 Thinking..."):
